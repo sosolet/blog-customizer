@@ -14,6 +14,7 @@ import {
 	fontSizeOptions,
 	OptionType,
 } from 'src/constants/articleProps';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
 
 import { useState, useRef, SyntheticEvent } from 'react';
 
@@ -27,68 +28,44 @@ type ArticleParamsFormProps = {
 export const ArticleParamsForm = ({
 	applyStatePage,
 }: ArticleParamsFormProps) => {
-	const [isOpen, setIsOpen] = useState(false);
-	const defaultState = useRef(defaultArticleState);
-	const [fontFamilyOption, setFontFamilyOption] = useState(
-		defaultState.current.fontFamilyOption
-	);
-	const [fontSizeOption, setFontSizeOption] = useState(
-		defaultState.current.fontSizeOption
-	);
-	const [fontColor, setFontColor] = useState(defaultState.current.fontColor);
-	const [backgroundColor, setBackgroundColor] = useState(
-		defaultState.current.backgroundColor
-	);
-	const [contentWidth, setContentWidth] = useState(
-		defaultState.current.contentWidth
+	const defaultState = useRef<ArticleStateType>(defaultArticleState);
+	const ref = useRef<HTMLDivElement | null>(null);
+	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const [formState, setFormState] = useState<ArticleStateType>(
+		defaultState.current
 	);
 
 	const toggleIsOpen = () => {
 		setIsOpen(!isOpen);
 	};
 
-	const changeFontFamily = (option: OptionType) => {
-		setFontFamilyOption(option);
-	};
+	useOutsideClickClose({
+		isOpen,
+		rootRef: ref,
+		onChange: toggleIsOpen,
+	});
 
-	const changeFontSize = (option: OptionType) => {
-		setFontSizeOption(option);
-	};
-
-	const changeFontColor = (option: OptionType) => {
-		setFontColor(option);
-	};
-
-	const changeBackgroundColor = (option: OptionType) => {
-		setBackgroundColor(option);
-	};
-
-	const changeContentWidth = (option: OptionType) => {
-		setContentWidth(option);
+	const updateFormState = (field: keyof ArticleStateType) => {
+		return (value: OptionType) => {
+			setFormState((prev) => ({
+				...prev,
+				[field]: value,
+			}));
+		};
 	};
 
 	const resetForm = () => {
-		setFontFamilyOption(defaultState.current.fontFamilyOption);
-		setFontSizeOption(defaultState.current.fontSizeOption);
-		setFontColor(defaultState.current.fontColor);
-		setBackgroundColor(defaultState.current.backgroundColor);
-		setContentWidth(defaultState.current.contentWidth);
+		setFormState(defaultState.current);
 		applyStatePage(defaultState.current);
 	};
 
 	const applyStateForm = (event: SyntheticEvent) => {
 		event.preventDefault();
-		applyStatePage({
-			fontFamilyOption: fontFamilyOption,
-			fontColor: fontColor,
-			backgroundColor: backgroundColor,
-			contentWidth: contentWidth,
-			fontSizeOption: fontSizeOption,
-		});
+		applyStatePage(formState);
 	};
 
 	return (
-		<>
+		<div ref={ref}>
 			<ArrowButton isOpen={isOpen} onClick={toggleIsOpen} />
 			<aside
 				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
@@ -98,34 +75,34 @@ export const ArticleParamsForm = ({
 					</Text>
 					<Select
 						options={fontFamilyOptions}
-						selected={fontFamilyOption}
-						onChange={changeFontFamily}
+						selected={formState.fontFamilyOption}
+						onChange={updateFormState('fontFamilyOption')}
 						title='Шрифт'
 					/>
 					<RadioGroup
 						name='fontSize'
 						options={fontSizeOptions}
-						selected={fontSizeOption}
-						onChange={changeFontSize}
+						selected={formState.fontSizeOption}
+						onChange={updateFormState('fontSizeOption')}
 						title='Размер шрифта'
 					/>
 					<Select
 						options={fontColors}
-						selected={fontColor}
-						onChange={changeFontColor}
+						selected={formState.fontColor}
+						onChange={updateFormState('fontColor')}
 						title='Цвет шрифта'
 					/>
 					<Separator />
 					<Select
 						options={backgroundColors}
-						selected={backgroundColor}
-						onChange={changeBackgroundColor}
+						selected={formState.backgroundColor}
+						onChange={updateFormState('backgroundColor')}
 						title='Цвет фона'
 					/>
 					<Select
 						options={contentWidthArr}
-						selected={contentWidth}
-						onChange={changeContentWidth}
+						selected={formState.contentWidth}
+						onChange={updateFormState('contentWidth')}
 						title='Ширина контента'
 					/>
 					<div className={styles.bottomContainer}>
@@ -139,6 +116,6 @@ export const ArticleParamsForm = ({
 					</div>
 				</form>
 			</aside>
-		</>
+		</div>
 	);
 };
