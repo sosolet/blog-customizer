@@ -1,26 +1,35 @@
-import { CSSProperties } from 'react';
+import { CSSProperties, useState } from 'react';
 import clsx from 'clsx';
 
 import { Article } from '../article/Article';
 import { ArticleParamsForm } from '../article-params-form/ArticleParamsForm';
-import { defaultArticleState } from './../../constants/articleProps';
+import {
+	defaultArticleState,
+	ArticleStateType,
+} from './../../constants/articleProps';
 
 import styles from './app.module.scss';
 
 export const App = () => {
+	const [statePage, setStatePage] = useState(defaultArticleState);
+
+	const applyStatePage = (state: ArticleStateType) => {
+		setStatePage(state);
+	};
+
 	return (
 		<main
 			className={clsx(styles.main)}
 			style={
 				{
-					'--font-family': defaultArticleState.fontFamilyOption.value,
-					'--font-size': defaultArticleState.fontSizeOption.value,
-					'--font-color': defaultArticleState.fontColor.value,
-					'--container-width': defaultArticleState.contentWidth.value,
-					'--bg-color': defaultArticleState.backgroundColor.value,
+					'--font-family': statePage.fontFamilyOption.value,
+					'--font-size': statePage.fontSizeOption.value,
+					'--font-color': statePage.fontColor.value,
+					'--container-width': statePage.contentWidth.value,
+					'--bg-color': statePage.backgroundColor.value,
 				} as CSSProperties
 			}>
-			<ArticleParamsForm />
+			<ArticleParamsForm applyStatePage={applyStatePage} />
 			<Article />
 		</main>
 	);
